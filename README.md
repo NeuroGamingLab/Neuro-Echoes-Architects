@@ -56,3 +56,7 @@ Agent auto-navigates: corridor → terminal → chamber → sigils **Sun → Moo
 ## Stack
 
 Three.js, Node Ollama proxy, Python static server
+
+## Designer
+
+Dang Hoang, AI Engineer
