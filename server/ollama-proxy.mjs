@@ -7,6 +7,7 @@ import http from "http";
 import { URL } from "url";
 
 const PORT = Number(process.env.OLLAMA_PROXY_PORT || 3001);
+const BIND_HOST = process.env.BIND_HOST || "127.0.0.1";
 const OLLAMA_URL = process.env.OLLAMA_URL || "http://127.0.0.1:11434";
 const DEFAULT_MODEL = process.env.OLLAMA_MODEL || "llama3.2:latest";
 
@@ -260,7 +261,7 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, "127.0.0.1", () => {
-  console.log(`Ollama proxy http://127.0.0.1:${PORT} -> ${OLLAMA_URL}`);
+server.listen(PORT, BIND_HOST, () => {
+  console.log(`Ollama proxy http://${BIND_HOST}:${PORT} -> ${OLLAMA_URL}`);
   console.log(`Default model: ${DEFAULT_MODEL}`);
 });

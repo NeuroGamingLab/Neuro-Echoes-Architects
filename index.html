@@ -8,13 +8,34 @@
   <script type="importmap">
   {
     "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.168.0/examples/jsm/"
+      "three": "/js/vendor/three.module.js",
+      "three/addons/": "/js/vendor/three/addons/"
     }
   }
   </script>
+  <style>
+    #boot-error {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      padding: 2rem;
+      background: #1a0808;
+      color: #ffb4a8;
+      font-family: system-ui, sans-serif;
+      line-height: 1.5;
+      overflow: auto;
+    }
+    #boot-error.visible { display: block; }
+    #boot-error code { color: #ffd4cc; word-break: break-all; }
+  </style>
 </head>
 <body>
+  <div id="boot-error" role="alert">
+    <h1>Game failed to load</h1>
+    <p id="boot-error-detail"></p>
+    <p>Open DevTools (F12) → Console for details. Try a hard refresh (Cmd+Shift+R).</p>
+  </div>
   <div id="game-root">
     <canvas id="game-canvas"></canvas>
     <div id="damage-flash"></div>
@@ -147,6 +168,21 @@
     </div>
   </div>
 
-  <script type="module" src="js/main.js"></script>
+  <script type="module">
+    const boot = document.getElementById("boot-error");
+    const detail = document.getElementById("boot-error-detail");
+    function showBootError(msg) {
+      if (detail) detail.textContent = msg;
+      boot?.classList.add("visible");
+    }
+    window.addEventListener("error", (e) => showBootError(e.message || "Script error"));
+    window.addEventListener("unhandledrejection", (e) =>
+      showBootError(e.reason?.message || String(e.reason))
+    );
+    import("./js/main.js").catch((err) => {
+      console.error(err);
+      showBootError(err.message || String(err));
+    });
+  </script>
 </body>
 </html>

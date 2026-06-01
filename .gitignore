@@ -1,6 +1,9 @@
 # Python
 __pycache__/
 *.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
 .venv/
 venv/
 .env
@@ -13,8 +16,31 @@ models/explorer_agent/*
 logs/*
 !logs/.gitkeep
 
+# Terraform — never commit state, plans, or personal tfvars (use terraform.tfvars.example)
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+tfplan
+**/tfplan
+crash.log
+override.tf
+override.tf.json
+terraform.tfvars
+**/terraform.tfvars
+
+# Secrets & keys
+*.pem
+*.key
+id_rsa
+id_ed25519
+!*.pub.example
+
 # OS / editor
 .DS_Store
 *.swp
 .idea/
 .vscode/
+
+# Cursor (local agent rules; optional to track — uncomment next line to version rules)
+.cursor/

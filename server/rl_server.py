@@ -12,6 +12,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
 PORT = int(os.environ.get("RL_SERVER_PORT", "3002"))
+BIND_HOST = os.environ.get("BIND_HOST", "127.0.0.1")
 MODEL_PATH = os.environ.get(
     "RL_MODEL_PATH",
     os.path.join(os.path.dirname(__file__), "..", "models", "explorer_agent", "best_model.zip"),
@@ -277,8 +278,8 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     _load_model()
-    server = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
-    print(f"RL server http://127.0.0.1:{PORT}")
+    server = ThreadingHTTPServer((BIND_HOST, PORT), Handler)
+    print(f"RL server http://{BIND_HOST}:{PORT}")
     print(f"Model path: {MODEL_PATH} (loaded={_load_model() is not None})")
     server.serve_forever()
 

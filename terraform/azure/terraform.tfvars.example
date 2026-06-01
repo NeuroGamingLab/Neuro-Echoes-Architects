@@ -1,0 +1,18 @@
+# Copy to terraform.tfvars (gitignored) and fill in your values.
+location       = "canadacentral"
+environment    = "demo"
+project_name   = "neuro-echoes-architects"
+vm_size        = "Standard_B4ms"
+admin_username = "azureuser"
+
+ssh_public_key = "ssh-rsa AAAA... your-key-comment"
+
+# Restrict to your public IP (/32). Do not use 0.0.0.0/0 for SSH.
+allowed_ssh_cidr  = ["YOUR.PUBLIC.IP/32"]
+allowed_game_cidr = ["YOUR.PUBLIC.IP/32"]
+
+github_repo_url = "https://github.com/NeuroGamingLab/Neuro-Echoes-Architects.git"
+github_branch   = "main"
+
+ollama_models = ["llama3.2:latest", "gemma:latest"]
+disk_size_gb  = 64

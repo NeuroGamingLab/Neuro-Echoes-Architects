@@ -1,4 +1,6 @@
-const PROXY_URL = "http://127.0.0.1:3001";
+import { serviceUrl } from "./api-host.js";
+
+const PROXY_URL = serviceUrl(3001);
 const MODEL_STORAGE_KEY = "echoes-ollama-model";
 export const DEFAULT_MODEL = "llama3.2:latest";
 

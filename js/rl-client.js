@@ -1,4 +1,6 @@
-const RL_URL = "http://127.0.0.1:3002";
+import { serviceUrl } from "./api-host.js";
+
+const RL_URL = serviceUrl(3002);
 const POLICY_STORAGE_KEY = "echoes-policy-mode";
 
 export const POLICY_MODES = [
