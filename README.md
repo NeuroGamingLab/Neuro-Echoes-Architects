@@ -2,6 +2,23 @@
 
 A 3D exploration prototype with an autonomous agent that combines **A* pathfinding**, **survival rules**, **action search**, **persistent memory**, and **local Ollama LLM** planning.
 
+## Screenshots
+
+| Stage 1 — Entry Chamber | Stage 1 — Sigils complete |
+|:---:|:---:|
+| ![Stage 1: Solar Gate sigil alignment](./images/screen1.png) | ![Stage 1: Watcher's Eye aligned, LLM plan active](./images/screen2.png) |
+| ML agent aligns sigils in the mustard chamber | All three sigils lit; hybrid RL + Ollama navigation |
+
+| Stage 3 — Ampule Vault | Stage 4 — Juggernaut Sanctum |
+|:---:|:---:|
+| ![Stage 3: Catalyst Urn secured in the vault](./images/screen3.png) | ![Stage 4: sanctum transition with specter combat](./images/screen4.png) |
+| Secure Catalyst → Serum → Payload urns | Pilot chair objectives; alpha-pack pursuers |
+
+| Stage 6 — Baroque Descent (gallery) |
+|:---:|
+| ![Stage 6: Baroque Descent gallery deck](./images/screen5.png) |
+| Artist murals, alien wall shadows, Cipher → Prism → Keystone relics |
+
 ## Play (with Ollama)
 
 **Terminal 1:**
