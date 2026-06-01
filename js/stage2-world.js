@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { BEACON_LABELS } from "./stage2-route.js";
 import { addBridgeMurals } from "./bridge-murals.js";
-import { MUSTARD_FLOOR, MUSTARD_WALL } from "./world.js";
 
 function addBox(scene, materials, size, position, materialKey = "wall", receiveShadow = true) {
   const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), materials[materialKey]);
@@ -47,22 +46,12 @@ export function buildStage2World(scene, materials, world) {
   voidGlow.position.set(0, -7.5, -36);
   scene.add(voidGlow);
 
-  // Mustard bridge deck + side walls (shared materials, explicit tint for stage 2)
-  materials.floor.color.setHex(MUSTARD_FLOOR);
-  materials.wall.color.setHex(MUSTARD_WALL);
-
+  // Bridge deck segments (extend to vault dock)
   for (let z = -22; z >= -51; z -= 4) {
     track(addBox(scene, materials, [4.2, 0.18, 4.2], [0, -0.02, z], "floor"));
-    for (const x of [-2.35, 2.35]) {
-      track(addBox(scene, materials, [0.32, 4.2, 4.2], [x, 2.1, z], "wall"));
-    }
   }
 
-  // End bulkheads
-  track(addBox(scene, materials, [4.9, 4.2, 0.32], [0, 2.1, -22], "wall"));
-  track(addBox(scene, materials, [4.9, 4.2, 0.32], [0, 2.1, -51], "wall"));
-
-  // Glass side rails (on inner face of mustard walls)
+  // Glass side rails
   for (const x of [-2.05, 2.05]) {
     for (let z = -22; z >= -50; z -= 5) {
       const rail = track(addBox(scene, materials, [0.08, 1.1, 4.8], [x, 0.55, z], "trim"));

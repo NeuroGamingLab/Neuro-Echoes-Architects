@@ -53,18 +53,14 @@ export function createLights(scene) {
   scene.add(chamberFill);
 }
 
-/** Shared wall/floor palette — all stages use materials from createMaterials(). */
-export const MUSTARD_FLOOR = 0xe8c547;
-export const MUSTARD_WALL = 0xc9a227;
-
 export function createMaterials() {
   const floorCanvas = document.createElement("canvas");
   floorCanvas.width = 512;
   floorCanvas.height = 512;
   const ctx = floorCanvas.getContext("2d");
-  ctx.fillStyle = "#c9a227";
+  ctx.fillStyle = "#0b1215";
   ctx.fillRect(0, 0, 512, 512);
-  ctx.strokeStyle = "rgba(140, 100, 20, 0.45)";
+  ctx.strokeStyle = "rgba(70, 110, 120, 0.35)";
   ctx.lineWidth = 1;
   for (let i = 0; i <= 512; i += 32) {
     ctx.beginPath();
@@ -83,12 +79,12 @@ export function createMaterials() {
   return {
     floor: new THREE.MeshStandardMaterial({
       map: floorTexture,
-      color: MUSTARD_FLOOR,
+      color: 0x88999a,
       roughness: 0.85,
       metalness: 0.15,
     }),
     wall: new THREE.MeshStandardMaterial({
-      color: MUSTARD_WALL,
+      color: 0x2a363c,
       roughness: 0.88,
       metalness: 0.08,
     }),

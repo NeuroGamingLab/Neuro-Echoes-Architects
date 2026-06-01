@@ -9,12 +9,6 @@ import { URL } from "url";
 const PORT = Number(process.env.OLLAMA_PROXY_PORT || 3001);
 const OLLAMA_URL = process.env.OLLAMA_URL || "http://127.0.0.1:11434";
 const DEFAULT_MODEL = process.env.OLLAMA_MODEL || "llama3.2:latest";
-const MAX_BODY_BYTES = Number(process.env.MAX_BODY_BYTES || 262144);
-const API_KEY = process.env.API_KEY || "";
-const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "http://127.0.0.1:8080,http://localhost:8080")
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
 
 const CHAT_MODELS = [
   "llama3.2:latest",
@@ -24,43 +18,21 @@ const CHAT_MODELS = [
   "gpt-oss:20b",
 ];
 
-function applyCors(req, res) {
-  const origin = req.headers.origin;
-  if (origin && ALLOWED_ORIGINS.includes(origin)) {
-    res.setHeader("Access-Control-Allow-Origin", origin);
-    res.setHeader("Vary", "Origin");
-  } else if (!origin && ALLOWED_ORIGINS.length === 1) {
-    res.setHeader("Access-Control-Allow-Origin", ALLOWED_ORIGINS[0]);
-  }
+function cors(res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-API-Key");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 }
 
-function requireAuth(req, res) {
-  if (!API_KEY) return true;
-  if (req.headers["x-api-key"] === API_KEY) return true;
-  sendJson(req, res, 401, { error: "Unauthorized" });
-  return false;
-}
-
-function sendJson(req, res, status, data) {
-  applyCors(req, res);
+function sendJson(res, status, data) {
+  cors(res);
   res.writeHead(status, { "Content-Type": "application/json" });
   res.end(JSON.stringify(data));
 }
 
 async function readBody(req) {
   const chunks = [];
-  let size = 0;
-  for await (const chunk of req) {
-    size += chunk.length;
-    if (size > MAX_BODY_BYTES) {
-      const err = new Error("Payload too large");
-      err.statusCode = 413;
-      throw err;
-    }
-    chunks.push(chunk);
-  }
+  for await (const chunk of req) chunks.push(chunk);
   if (!chunks.length) return {};
   return JSON.parse(Buffer.concat(chunks).toString("utf8"));
 }
@@ -234,7 +206,7 @@ async function handleHealth() {
 }
 
 const server = http.createServer(async (req, res) => {
-  applyCors(req, res);
+  cors(res);
   if (req.method === "OPTIONS") {
     res.writeHead(204);
     res.end();
@@ -246,14 +218,14 @@ const server = http.createServer(async (req, res) => {
   try {
     if (req.method === "GET" && url.pathname === "/api/health") {
       const health = await handleHealth();
-      sendJson(req, res, health.ok ? 200 : 503, health);
+      sendJson(res, health.ok ? 200 : 503, health);
       return;
     }
 
     if (req.method === "GET" && url.pathname === "/api/models") {
       const health = await handleHealth();
       const installed = new Set(health.models || []);
-      sendJson(req, res, health.ok ? 200 : 503, {
+      sendJson(res, health.ok ? 200 : 503, {
         ok: health.ok,
         error: health.error,
         ollama: OLLAMA_URL,
@@ -268,26 +240,23 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === "POST" && url.pathname === "/api/agent/plan") {
-      if (!requireAuth(req, res)) return;
       const body = await readBody(req);
       const plan = await handlePlan(body);
-      sendJson(req, res, 200, plan);
+      sendJson(res, 200, plan);
       return;
     }
 
     if (req.method === "POST" && url.pathname === "/api/agent/react") {
-      if (!requireAuth(req, res)) return;
       const body = await readBody(req);
       const plan = await handleReact(body);
-      sendJson(req, res, 200, plan);
+      sendJson(res, 200, plan);
       return;
     }
 
-    sendJson(req, res, 404, { error: "Not found" });
+    sendJson(res, 404, { error: "Not found" });
   } catch (err) {
     console.error(err);
-    const code = err.statusCode === 413 ? 413 : 500;
-    sendJson(req, res, code, { error: err.message });
+    sendJson(res, 500, { error: err.message });
   }
 });
 
