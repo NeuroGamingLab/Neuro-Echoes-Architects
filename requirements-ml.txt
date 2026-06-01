@@ -1,0 +1,10 @@
+# Core RL server (stdlib only — rule policy + pursuer coordinator)
+# Optional training / PPO inference:
+# pip install -r requirements-ml.txt
+
+numpy>=1.24
+gymnasium>=0.29
+stable-baselines3>=2.3
+scikit-learn>=1.3
+joblib>=1.3
+torch>=2.0

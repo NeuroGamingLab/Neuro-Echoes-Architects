@@ -1,0 +1,22 @@
+environment:
+  max_steps: 800
+  agent_speed: 3.6
+
+agent:
+  algorithm: ppo
+  learning_rate: 0.0003
+  n_steps: 2048
+  batch_size: 64
+  gamma: 0.99
+  policy_kwargs:
+    net_arch:
+      pi: [128, 128]
+      vf: [128, 128]
+
+training:
+  total_timesteps: 100000
+  save_path: models/explorer_agent
+
+unsupervised:
+  n_components: 16
+  n_clusters: 12

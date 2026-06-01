@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Echoes of the Architects</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.168.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="game-root">
+    <canvas id="game-canvas"></canvas>
+    <div id="damage-flash"></div>
+
+    <div id="hud" class="hidden">
+      <div id="top-bar">
+        <div class="stat">
+          <span class="label">O₂ RESERVE</span>
+          <div class="bar-track"><div id="oxygen-bar"></div></div>
+        </div>
+        <div class="stat">
+          <span class="label" id="stage-label">STAGE 1</span>
+          <span id="stage-name">Entry Chamber</span>
+        </div>
+        <div class="stat">
+          <span class="label" id="objective-label">SIGILS</span>
+          <span id="objective-count">0 / 3</span>
+        </div>
+        <div class="stat music-stat">
+          <span class="label">MUSIC</span>
+          <span id="music-track">Life</span>
+        </div>
+      </div>
+      <div id="crosshair"></div>
+      <div id="message"></div>
+
+      <div id="agent-panel">
+        <span class="label">ML Navigation Agent</span>
+        <p id="agent-status">Standby</p>
+        <div class="agent-meta">
+          <span class="meta-label">Policy</span>
+          <span id="agent-policy">—</span>
+        </div>
+        <div class="agent-meta">
+          <span class="meta-label">LLM plan</span>
+        </div>
+        <p id="agent-reasoning" class="agent-reasoning">—</p>
+        <div class="agent-meta">
+          <span class="meta-label">Memory</span>
+          <span id="agent-memory">Runs 0 · Wins 0 · Hot zones 0</span>
+        </div>
+        <div class="agent-meta">
+          <span class="meta-label">Confidence</span>
+          <div class="bar-track"><div id="agent-confidence"></div></div>
+        </div>
+      </div>
+
+      <div id="minimap-wrap">
+        <span class="label">Structure Map</span>
+        <canvas id="minimap" width="220" height="220"></canvas>
+        <ul id="map-legend">
+          <li><span class="dot you"></span> You</li>
+          <li><span class="dot sigil"></span> Sigils</li>
+          <li><span class="dot objective"></span> Objectives</li>
+          <li><span class="dot hazard"></span> Traps</li>
+          <li><span class="dot specter"></span> Specters</li>
+        </ul>
+      </div>
+    </div>
+
+    <div id="overlay" class="screen">
+      <div class="panel">
+        <p class="eyebrow">Research Vessel Meridian · LV-223 Analog</p>
+        <h1>Echoes of the Architects</h1>
+        <p class="tagline">
+          Deploy an autonomous ML agent through fourteen stages of the LV-223 megastructure:
+          restore the star map, cross the bridge, survive the vault and sanctum, then climb ten gallery decks
+          with stairwells, famous-artist murals, and alien shadows that slide along the walls.
+        </p>
+        <ul class="controls">
+          <li><strong>Neuro-Adaptive RL</strong> — PPO / rule policy + alpha-pack pursuers</li>
+          <li><strong>Survival rules</strong> — suppress, retreat, hold when traps charge</li>
+          <li><strong>Hybrid mode</strong> — RL navigation + Ollama strategy</li>
+          <li><strong>State encoder</strong> — PCA + K-Means clustering (training)</li>
+          <li><strong>Auto-retry</strong> until mission success</li>
+        </ul>
+        <div class="model-row">
+          <label class="label" for="policy-mode">Agent policy</label>
+          <select id="policy-mode"></select>
+        </div>
+        <div class="model-row">
+          <label class="label" for="ollama-model">Ollama model</label>
+          <select id="ollama-model"></select>
+        </div>
+        <p id="rl-status" class="llm-status offline">Checking RL server…</p>
+        <div class="music-row">
+          <label class="music-toggle">
+            <input type="checkbox" id="music-enabled" checked />
+            Electronic Prometheus synth · sequenced tones
+          </label>
+          <label class="label" for="music-volume">Volume</label>
+          <input type="range" id="music-volume" min="0" max="100" value="55" />
+        </div>
+        <p id="llm-status" class="llm-status offline">Checking Ollama…</p>
+        <p class="tagline warn" id="learning-text">
+          Loading agent memory…
+        </p>
+        <button id="start-btn">Deploy ML Agent</button>
+        <button id="clear-memory-btn" class="secondary" type="button">Clear Learned Memory</button>
+      </div>
+    </div>
+
+    <div id="stage-banner" class="hidden">
+      <p class="eyebrow" id="stage-banner-eyebrow">Stage Transition</p>
+      <h2 id="stage-banner-title">Stage 2</h2>
+      <p id="stage-banner-tagline">Architect's Bridge</p>
+    </div>
+
+    <div id="win-screen" class="screen hidden">
+      <div class="panel">
+        <p class="eyebrow">Mission Complete</p>
+        <h1 id="win-title">Mission Complete</h1>
+        <p class="tagline" id="win-tagline">
+          The agent escaped the megastructure aboard the cryo pod after
+          <span id="win-attempts">1</span> attempt(s) this session.
+        </p>
+        <button id="restart-btn">Play Again</button>
+      </div>
+    </div>
+
+    <div id="lose-screen" class="screen hidden">
+      <div class="panel danger">
+        <p class="eyebrow" id="lose-eyebrow">Life Support Critical</p>
+        <h1 id="lose-title">Oxygen Depleted</h1>
+        <p class="tagline" id="lose-tagline">
+          The structure keeps its secrets. Your suit fails in the dark.
+        </p>
+        <button id="retry-btn">Try Again</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
