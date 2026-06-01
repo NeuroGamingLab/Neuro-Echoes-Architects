@@ -12,6 +12,15 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse
 
 PORT = int(os.environ.get("RL_SERVER_PORT", "3002"))
+MAX_BODY_BYTES = int(os.environ.get("MAX_BODY_BYTES", "262144"))
+API_KEY = os.environ.get("API_KEY", "")
+ALLOWED_ORIGINS = [
+    o.strip()
+    for o in os.environ.get(
+        "ALLOWED_ORIGINS", "http://127.0.0.1:8080,http://localhost:8080"
+    ).split(",")
+    if o.strip()
+]
 MODEL_PATH = os.environ.get(
     "RL_MODEL_PATH",
     os.path.join(os.path.dirname(__file__), "..", "models", "explorer_agent", "best_model.zip"),
@@ -214,9 +223,19 @@ class Handler(BaseHTTPRequestHandler):
         return
 
     def _cors(self):
-        self.send_header("Access-Control-Allow-Origin", "*")
+        origin = self.headers.get("Origin")
+        if origin and origin in ALLOWED_ORIGINS:
+            self.send_header("Access-Control-Allow-Origin", origin)
+            self.send_header("Vary", "Origin")
+        elif not origin and len(ALLOWED_ORIGINS) == 1:
+            self.send_header("Access-Control-Allow-Origin", ALLOWED_ORIGINS[0])
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, X-API-Key")
+
+    def _auth_ok(self) -> bool:
+        if not API_KEY:
+            return True
+        return self.headers.get("X-API-Key") == API_KEY
 
     def _json(self, code: int, data: dict):
         body = json.dumps(data).encode("utf-8")
@@ -231,6 +250,8 @@ class Handler(BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length", 0))
         if length <= 0:
             return {}
+        if length > MAX_BODY_BYTES:
+            raise ValueError("Payload too large")
         return json.loads(self.rfile.read(length).decode("utf-8"))
 
     def do_OPTIONS(self):
@@ -258,6 +279,9 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = urlparse(self.path).path
+        if not self._auth_ok():
+            self._json(401, {"error": "Unauthorized"})
+            return
         try:
             body = self._read_json()
             if path == "/api/act":
@@ -271,6 +295,11 @@ class Handler(BaseHTTPRequestHandler):
                 self._json(200, pursuer_coordinator(body))
                 return
             self._json(404, {"error": "Not found"})
+        except ValueError as exc:
+            if "too large" in str(exc).lower():
+                self._json(413, {"error": str(exc)})
+            else:
+                self._json(400, {"error": str(exc)})
         except Exception as exc:
             self._json(500, {"error": str(exc)})
 

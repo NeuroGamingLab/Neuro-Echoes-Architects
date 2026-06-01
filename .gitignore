@@ -13,8 +13,24 @@ models/explorer_agent/*
 logs/*
 !logs/.gitkeep
 
+# Terraform (never commit secrets or state)
+terraform/**/.terraform/
+terraform/**/*.tfstate
+terraform/**/*.tfstate.*
+terraform/**/terraform.tfvars
+terraform/**/tfplan
+terraform/**/*.tfplan
+terraform/**/crash.log
+
+# Keys / certs
+*.pem
+id_rsa
+id_ed25519
+!*.pub
+
 # OS / editor
 .DS_Store
 *.swp
 .idea/
 .vscode/
+.cursor/

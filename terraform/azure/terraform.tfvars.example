@@ -1,0 +1,20 @@
+# Copy to terraform.tfvars and fill in your SSH public key.
+# cp terraform.tfvars.example terraform.tfvars
+
+location       = "canadacentral"
+environment    = "demo"
+project_name   = "neuro-echoes-architects"
+vm_size        = "Standard_B4ms" # 16 GiB CPU — llama3.2 + gemma
+admin_username = "azureuser"
+
+ssh_public_key = "ssh-ed25519 AAAA... your-key-here"
+
+# Required — replace with your public IP (curl -s ifconfig.me)
+allowed_ssh_cidr  = ["203.0.113.10/32"]
+allowed_game_cidr = ["203.0.113.10/32"]
+
+github_repo_url = "https://github.com/NeuroGamingLab/Neuro-Echoes-Architects.git"
+github_branch   = "main"
+
+ollama_models = ["llama3.2:latest", "gemma:latest"]
+disk_size_gb  = 64
